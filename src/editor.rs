@@ -5,6 +5,10 @@ use termion::{input::TermRead, raw::IntoRawMode};
 pub struct Editor {}
 
 impl Editor {
+    pub fn default() -> Self {
+        Self {}
+    }
+    
     pub fn run(&self) {
         let _stdout = stdout().into_raw_mode().unwrap();
 
