@@ -37,7 +37,7 @@ impl Terminal {
 
     pub fn cursor_position(position: &Position) {
         let Position {  x,  y } = position;
-
+        
         let x = x.saturating_add(1) as u16;
         let y = y.saturating_add(1) as u16;
 
@@ -57,17 +57,18 @@ impl Terminal {
     }
 
     pub fn cursor_hide() {
-        print!("{}", termion::cursor::Hide)
+        print!("{}", termion::cursor::Hide);
     }
 
     pub fn cursor_show() {
-        print!("{}", termion::cursor::Show)
+        print!("{}", termion::cursor::Show);
     }
 
     pub fn clear_current_line() {
-        print!("{}", termion::clear::CurrentLine)
+        print!("{}", termion::clear::CurrentLine);
     }
 
+    #[must_use]
     pub fn size(&self) -> &Size {
         &self.size
     }
