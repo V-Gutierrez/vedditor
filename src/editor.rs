@@ -8,7 +8,8 @@ impl Editor {
     pub fn default() -> Self {
         Self {}
     }
-    
+
+    #[allow(clippy::unused_self)]
     pub fn run(&self) {
         let _stdout = stdout().into_raw_mode().unwrap();
 
@@ -17,23 +18,23 @@ impl Editor {
                 Ok(key) => match key {
                     Key::Char(c) => {
                         if c.is_control() {
-                            println!("{:?}\r", c as u8);
+                            println!("{c:?}\r");
                         } else {
-                            println!("{:?} ({})\r", c as u8, c);
+                            println!("{c:?} ({c})\r");
                         }
                     }
                     Key::Ctrl('c') => {
-                        println!("{:?}\r", key);
+                        println!("{key:?}\r");
                         break;
                     }
-                    _ => println!("{:?}\r", key),
+                    _ => println!("{key:?}\r"),
                 },
-                Err(e) => Editor::finish_with_error(e),
+                Err(e) => Editor::finish_with_error(&e),
             }
         }
     }
 
-    fn finish_with_error(e: std::io::Error) {
-        panic!("{}", e);
+    fn finish_with_error(e: &std::io::Error) {
+        panic!("{e}");
     }
 }
