@@ -3,6 +3,10 @@ use std::io::stdout;
 use termion::event::Key;
 use termion::raw::IntoRawMode;
 
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+const EDITOR_NAME: &str = env!("CARGO_PKG_NAME");
+const AUTHORS: &str = env!("CARGO_PKG_AUTHORS");
+
 pub struct Editor {
     should_quit: bool,
     terminal: Terminal,
@@ -54,7 +58,7 @@ impl Editor {
     fn refresh_screen(&self) -> Result<(), std::io::Error> {
         Terminal::cursor_hide();
         Terminal::cursor_position(0, 0);
-        
+
         if self.should_quit {
             Terminal::clear_screen();
             println!("Goodbye.\r");
@@ -67,10 +71,31 @@ impl Editor {
         Terminal::flush()
     }
 
+    fn draw_welcome_message(&self) {
+        let authors = AUTHORS.replace(":", " and ");
+        let mut welcome_message = format!("{EDITOR_NAME} -- version {VERSION}\n by {authors}");
+        let width = self.terminal.size().width as usize;
+
+        let len = welcome_message.len();
+        let padding = (width.saturating_sub(len)) / 2;
+        let spaces = " ".repeat(padding.saturating_sub(1));
+
+        welcome_message = format!("~{spaces}{welcome_message}{spaces}~");
+        welcome_message.truncate(width);
+
+        println!("{welcome_message}\r");
+    }
+
     fn draw_rows(&self) {
-        for _ in 0..self.terminal.size().height - 1 {
+        let height = self.terminal.size().height;
+
+        for row in 0..height - 1 {
             Terminal::clear_current_line();
-            println!("~\r");
+            if row == height / 3 {
+                self.draw_welcome_message()
+            } else {
+                println!("\r");
+            }
         }
     }
 }
