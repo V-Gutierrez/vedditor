@@ -7,9 +7,15 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 const EDITOR_NAME: &str = env!("CARGO_PKG_NAME");
 const AUTHORS: &str = env!("CARGO_PKG_AUTHORS");
 
+pub struct Position {
+    pub x: usize,
+    pub y: usize,
+}
+
 pub struct Editor {
     should_quit: bool,
     terminal: Terminal,
+    cursor_position: Position,
 }
 
 impl Editor {
@@ -17,6 +23,7 @@ impl Editor {
         Self {
             should_quit: false,
             terminal: Terminal::default().expect("Error initializing Terminal instance"),
+            cursor_position: Position { x: 0, y: 0 },
         }
     }
 
@@ -57,14 +64,14 @@ impl Editor {
 
     fn refresh_screen(&self) -> Result<(), std::io::Error> {
         Terminal::cursor_hide();
-        Terminal::cursor_position(0, 0);
+        Terminal::cursor_position(&Position{x: 0, y: 0});
 
         if self.should_quit {
             Terminal::clear_screen();
             println!("Goodbye.\r");
         } else {
             self.draw_rows();
-            Terminal::cursor_position(0, 0);
+            Terminal::cursor_position(&self.cursor_position);
         }
 
         Terminal::cursor_show();
