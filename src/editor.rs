@@ -2,39 +2,52 @@ use std::io::{stdin, stdout};
 use termion::event::Key;
 use termion::{input::TermRead, raw::IntoRawMode};
 
-pub struct Editor {}
+pub struct Editor {
+    should_quit: bool,
+}
 
 impl Editor {
     pub fn default() -> Self {
-        Self {}
+        Self {
+            should_quit: false
+        }
     }
 
-    #[allow(clippy::unused_self)]
-    pub fn run(&self) {
+    pub fn run(&mut self) {
         let _stdout = stdout().into_raw_mode().unwrap();
 
-        for key in stdin().keys() {
-            match key {
-                Ok(key) => match key {
-                    Key::Char(c) => {
-                        if c.is_control() {
-                            println!("{c:?}\r");
-                        } else {
-                            println!("{c:?} ({c})\r");
-                        }
-                    }
-                    Key::Ctrl('c') => {
-                        println!("{key:?}\r");
-                        break;
-                    }
-                    _ => println!("{key:?}\r"),
-                },
-                Err(e) => Editor::finish_with_error(&e),
+        loop {
+            if let Err(error) = self.process_keypress() {
+                Editor::quit_with_error(&error);
+            }
+
+            if self.should_quit {
+                break;
             }
         }
     }
 
-    fn finish_with_error(e: &std::io::Error) {
+    fn quit_with_error(e: &std::io::Error) {
         panic!("{e}");
+    }
+
+    fn process_keypress(&mut self) -> Result<(), std::io::Error> {
+        // ? Stands for ->  If there’s an error, return it, if not, unwrap the value and continue.
+        let pressed_key = Editor::read_key()?;
+
+        match pressed_key {
+            Key::Ctrl('x') => Ok({
+                self.should_quit = true;
+            }),
+            _ => Ok(()),
+        }
+    }
+
+    fn read_key() -> Result<Key, std::io::Error> {
+        loop {
+            if let Some(key) = stdin().lock().keys().next() {
+                return key;
+            }
+        }
     }
 }
