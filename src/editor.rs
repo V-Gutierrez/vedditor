@@ -1,7 +1,7 @@
 use crate::terminal::Terminal;
-use std::io::{stdin, stdout, Write};
+use std::io::stdout;
 use termion::event::Key;
-use termion::{input::TermRead, raw::IntoRawMode};
+use termion::raw::IntoRawMode;
 
 pub struct Editor {
     should_quit: bool,
@@ -20,7 +20,7 @@ impl Editor {
         let _stdout = stdout().into_raw_mode().unwrap();
 
         loop {
-            if let Err(error) = self.render_editor() {
+            if let Err(error) = self.refresh_screen() {
                 Editor::quit_with_error(&error);
             }
 
@@ -35,13 +35,13 @@ impl Editor {
     }
 
     fn quit_with_error(e: &std::io::Error) {
-        print!("{}", termion::clear::All);
+        Terminal::clear_screen();
         panic!("{e}");
     }
 
     fn process_keypress(&mut self) -> Result<(), std::io::Error> {
         // ? Stands for ->  If there’s an error, return it, if not, unwrap the value and continue.
-        let pressed_key = Editor::read_key()?;
+        let pressed_key = Terminal::read_key()?;
 
         match pressed_key {
             Key::Ctrl('x') => Ok({
@@ -51,29 +51,23 @@ impl Editor {
         }
     }
 
-    fn render_editor(&self) -> Result<(), std::io::Error> {
-        print!("{}{}", termion::clear::All, termion::cursor::Goto(1, 1));
+    fn refresh_screen(&self) -> Result<(), std::io::Error> {
+        Terminal::clear_screen();
+        Terminal::cursor_position(0, 0);
 
         if self.should_quit {
             println!("Goodbye.\r");
         } else {
-            self.draw_rows()
+            self.draw_rows();
+            Terminal::cursor_position(0, 0);
         }
 
-        stdout().flush()
+        Terminal::flush()
     }
 
     fn draw_rows(&self) {
         for _ in 0..self.terminal.size().height {
             println!("~\r");
-        }
-    }
-
-    fn read_key() -> Result<Key, std::io::Error> {
-        loop {
-            if let Some(key) = stdin().lock().keys().next() {
-                return key;
-            }
         }
     }
 }
