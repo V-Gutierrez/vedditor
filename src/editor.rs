@@ -63,7 +63,10 @@ impl Editor {
             Key::Ctrl('x') => Ok({
                 self.should_quit = true;
             }),
-            Key::Up | Key::Down | Key::Left | Key::Right | Key::PageUp | Key::PageDown | Key::End | Key::Home => Ok(self.move_cursor(pressed_key)),
+            Key::Up | Key::Down | Key::Left | Key::Right | Key::PageUp | Key::PageDown | Key::End | Key::Home => {
+                self.move_cursor(pressed_key);
+                Ok(())
+            },
             _ => Ok(()),
         }
     }
@@ -106,7 +109,7 @@ impl Editor {
     }
 
     fn draw_welcome_message(&self) {
-        let authors = AUTHORS.replace(":", " and ");
+        let authors = AUTHORS.replace(':', " and ");
         let mut welcome_message = format!("{EDITOR_NAME} -- version {VERSION}\n by {authors}");
         let width = self.terminal.size().width as usize;
 
