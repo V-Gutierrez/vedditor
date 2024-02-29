@@ -9,10 +9,13 @@ pub struct Row {
 
 impl From<&str> for Row {
     fn from(slice: &str) -> Self {
-        Self {
+        let mut row = Self {
             string: String::from(slice),
             len: 0
-        }
+        };
+
+        row.update_len();
+        row
     }
 }
 
@@ -46,5 +49,9 @@ impl Row {
 
     pub fn is_empty(&self) -> bool {
         self.len == 0
+    }
+
+    pub fn update_len(&mut self) {
+        self.len = self.string.graphemes(true).count();
     }
 }
