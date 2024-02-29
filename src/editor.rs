@@ -1,6 +1,7 @@
 use crate::terminal::Terminal;
 use crate::document::Document;
 use crate::Row;
+use std::env;
 use std::io::stdout;
 use termion::event::Key;
 use termion::raw::IntoRawMode;
@@ -19,16 +20,26 @@ pub struct Editor {
     should_quit: bool,
     terminal: Terminal,
     cursor_position: Position,
+    offset: Position,
     document: Document
 }
 
 impl Editor {
     pub fn default() -> Self {
+        let args: Vec<String> = env::args().collect();
+        let document = if args.len() > 1 {
+            let file_name = &args[1];
+            Document::open(&file_name).unwrap_or_default()
+        } else {
+            Document::default()
+        };
+
         Self {
             should_quit: false,
             terminal: Terminal::init().expect("Error initializing Terminal instance"),
             cursor_position: Position::default(),
-            document: Document::open(),
+            offset: Position::default(),
+            document,
         }
     }
 
@@ -65,16 +76,36 @@ impl Editor {
             }),
             Key::Up | Key::Down | Key::Left | Key::Right | Key::PageUp | Key::PageDown | Key::End | Key::Home => {
                 self.move_cursor(pressed_key);
-                Ok(())
+                Ok(self.scroll())
             },
             _ => Ok(()),
+        }
+    }
+
+    fn scroll(&mut self) {
+        let Position { x, y } = self.cursor_position;
+        let width = self.terminal.size().width as usize;
+        let height = self.terminal.size().height as usize;
+
+        let mut offset = &mut self.offset;
+
+        if y < offset.y {
+            offset.y = y
+        } else if y >= offset.y.saturating_add(height) {
+            offset.y = y.saturating_sub(height).saturating_add(1)
+        }
+
+        if x < offset.x {
+            offset.x = x
+        } else if x >= offset.x.saturating_sub(width) {
+            offset.x = x.saturating_sub(width).saturating_add(1)
         }
     }
 
     fn move_cursor(&mut self, key: Key) {
         let Position { mut x, mut y } = self.cursor_position;
         let size = self.terminal.size();
-        let height = size.height.saturating_sub(1) as usize;
+        let height = self.document.len();
         let width = size.width.saturating_sub(1) as usize;
 
         match key {
@@ -124,8 +155,10 @@ impl Editor {
     }
 
     pub fn draw_row(&self, row: &Row){
-        let start = 0;
-        let end = self.terminal.size().width as usize;
+        let start = self.offset.x;
+        let width = self.terminal.size().width as usize;
+        let end = self.offset.x + width;
+
         let row = row.render(start, end);
 
         println!("{row}\r");
@@ -137,10 +170,10 @@ impl Editor {
         for terminal_row in 0..height - 1 {
             Terminal::clear_current_line();
 
-            if let Some(row) = self.document.row(terminal_row as usize) {
+            if let Some(row) = self.document.row(terminal_row as usize + self.offset.y) {
                 self.draw_row(row);
             }
-            else if terminal_row == height / 3 {
+            else if self.document.is_empty() && terminal_row == height / 3 {
                 self.draw_welcome_message();
             } else {
                 println!("\r");
