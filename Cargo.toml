@@ -9,3 +9,4 @@ authors = ["Victor Gutierrez", "Flenker"]
 
 [dependencies]
 termion = "3.0.0"
+unicode-segmentation = "1"
