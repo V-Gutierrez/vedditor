@@ -1,4 +1,5 @@
 use crate::terminal::Terminal;
+use crate::document::Document;
 use std::io::stdout;
 use termion::event::Key;
 use termion::raw::IntoRawMode;
@@ -7,6 +8,7 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 const EDITOR_NAME: &str = env!("CARGO_PKG_NAME");
 const AUTHORS: &str = env!("CARGO_PKG_AUTHORS");
 
+#[derive(Default)]
 pub struct Position {
     pub x: usize,
     pub y: usize,
@@ -16,6 +18,7 @@ pub struct Editor {
     should_quit: bool,
     terminal: Terminal,
     cursor_position: Position,
+    document: Document
 }
 
 impl Editor {
@@ -23,7 +26,8 @@ impl Editor {
         Self {
             should_quit: false,
             terminal: Terminal::default().expect("Error initializing Terminal instance"),
-            cursor_position: Position { x: 0, y: 0 },
+            cursor_position: Position::default(),
+            document: Document::open(),
         }
     }
 
@@ -86,7 +90,7 @@ impl Editor {
 
     fn refresh_screen(&self) -> Result<(), std::io::Error> {
         Terminal::cursor_hide();
-        Terminal::cursor_position(&Position { x: 0, y: 0 });
+        Terminal::cursor_position(&Position::default());
 
         if self.should_quit {
             Terminal::clear_screen();
