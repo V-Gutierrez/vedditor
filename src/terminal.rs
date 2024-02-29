@@ -19,7 +19,7 @@ pub struct Terminal {
 }
 
 impl Terminal {
-    pub fn default() -> Result<Self, std::io::Error> {
+    pub fn init() -> Result<Self, std::io::Error> {
         let size = termion::terminal_size()?;
 
         Ok(Self {
@@ -35,6 +35,7 @@ impl Terminal {
         print!("{}", termion::clear::All);
     }
 
+    #[allow(clippy::cast_possible_truncation)]
     pub fn cursor_position(position: &Position) {
         let Position {  x,  y } = position;
         

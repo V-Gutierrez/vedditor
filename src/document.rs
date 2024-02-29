@@ -7,6 +7,7 @@ pub struct Document {
 }
 
 impl Document {
+  #[must_use]
   pub fn open() -> Self {
     let mut rows: Vec<Row> = vec![];
 
@@ -17,6 +18,7 @@ impl Document {
     }
   }
 
+  #[must_use]
   pub fn row(&self, index:usize) -> Option<&Row> {
     self.rows.get(index)
   }
