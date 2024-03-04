@@ -92,4 +92,14 @@ impl Row {
 
         self.update_len();
     }
+
+    pub fn split(&mut self, at: usize) -> Self {
+        let beggining: String = self.string[..].graphemes(true).take(at).collect();
+        let remainder: String = self.string[..].graphemes(true).skip(at).collect();
+
+        self.string = beggining;
+        self.update_len();
+
+       Self::from(&remainder[..])
+    }
 }

@@ -104,18 +104,11 @@ impl Editor {
                 self.should_quit = true;
             }),
             Key::Char(c) => {
-                // New line logic
-                if c == '\n' {
-                    self.document.insert_row(&self.cursor_position);
-                    self.move_cursor(Key::Down);
-                    self.move_cursor(Key::Home);
-                } else {   
-                    self.document.insert(&self.cursor_position, c);
-                    self.move_cursor(Key::Right);
-                }
+                self.document.insert(&self.cursor_position, c);
+                self.move_cursor(Key::Right);
 
                 Ok(())
-            },
+            }
             Key::Up
             | Key::Down
             | Key::Left
@@ -131,14 +124,14 @@ impl Editor {
             Key::Delete => {
                 self.document.delete(&self.cursor_position);
                 Ok(())
-            },
+            }
             Key::Backspace => {
                 if self.cursor_position.x > 0 || self.cursor_position.y > 0 {
                     self.move_cursor(Key::Left);
                     self.document.delete(&self.cursor_position);
                 }
                 Ok(())
-            },
+            }
             _ => Ok(()),
         }
     }
