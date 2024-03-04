@@ -22,15 +22,16 @@ pub struct Position {
 
 pub struct StatusMessage {
     text: String,
-    time: Instant
+    time: Instant,
 }
 
 impl From<String> for StatusMessage {
     fn from(text: String) -> Self {
         Self {
             text,
-            time: Instant::now()
-        }    }
+            time: Instant::now(),
+        }
+    }
 }
 
 pub struct Editor {
@@ -39,7 +40,7 @@ pub struct Editor {
     cursor_position: Position,
     offset: Position,
     document: Document,
-    status_message: StatusMessage
+    status_message: StatusMessage,
 }
 
 impl Editor {
@@ -51,7 +52,7 @@ impl Editor {
             let file_name = &args[1];
             let doc = Document::open(&file_name);
 
-            if doc.is_ok()  {
+            if doc.is_ok() {
                 doc.unwrap()
             } else {
                 initial_status = format!("Error: Could not open file: {file_name}");
@@ -67,7 +68,7 @@ impl Editor {
             cursor_position: Position::default(),
             offset: Position::default(),
             document,
-            status_message: StatusMessage::from(initial_status)
+            status_message: StatusMessage::from(initial_status),
         }
     }
 
@@ -103,10 +104,18 @@ impl Editor {
                 self.should_quit = true;
             }),
             Key::Char(c) => {
-                self.document.insert(&self.cursor_position, c);
+                // New line logic
+                if c == '\n' {
+                    self.document.insert_row(&self.cursor_position);
+                    self.move_cursor(Key::Down);
+                    self.move_cursor(Key::Home);
+                } else {   
+                    self.document.insert(&self.cursor_position, c);
+                    self.move_cursor(Key::Right);
+                }
 
-                Ok(self.move_cursor(Key::Right))
-            }
+                Ok(())
+            },
             Key::Up
             | Key::Down
             | Key::Left
@@ -119,6 +128,17 @@ impl Editor {
                 self.scroll();
                 Ok(())
             }
+            Key::Delete => {
+                self.document.delete(&self.cursor_position);
+                Ok(())
+            },
+            Key::Backspace => {
+                if self.cursor_position.x > 0 || self.cursor_position.y > 0 {
+                    self.move_cursor(Key::Left);
+                    self.document.delete(&self.cursor_position);
+                }
+                Ok(())
+            },
             _ => Ok(()),
         }
     }
@@ -147,7 +167,7 @@ impl Editor {
         let Position { mut x, mut y } = self.cursor_position;
         let terminal_height = self.terminal.size().height as usize;
         let height = self.document.len();
-        
+
         let mut width = if let Some(row) = self.document.row(y) {
             row.len()
         } else {
