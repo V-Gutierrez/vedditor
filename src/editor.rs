@@ -102,6 +102,11 @@ impl Editor {
             Key::Ctrl('x') => Ok({
                 self.should_quit = true;
             }),
+            Key::Char(c) => {
+                self.document.insert(&self.cursor_position, c);
+
+                Ok(self.move_cursor(Key::Right))
+            }
             Key::Up
             | Key::Down
             | Key::Left
