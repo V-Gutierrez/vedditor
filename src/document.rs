@@ -1,4 +1,7 @@
-use std::{fs, io::Error};
+use std::{
+    fs,
+    io::{Error, Write},
+};
 
 use crate::{Position, Row};
 
@@ -62,8 +65,8 @@ impl Document {
 
         if at.y == self.len() {
             self.rows.push(Row::default());
-            return
-        }    
+            return;
+        }
 
         let new_row = self.rows.get_mut(at.y).unwrap().split(at.y);
 
@@ -88,5 +91,17 @@ impl Document {
 
             row.delete(at.x);
         }
+    }
+
+    pub fn save(&self) -> Result<(), Error> {
+        if let Some(file_name) = &self.file_name {
+            let mut file = fs::File::create(file_name)?;
+
+            for row in &self.rows {
+                file.write_all(row.as_bytes())?;
+                file.write_all(b"\n")?;
+            }
+        }
+        Ok(())
     }
 }
