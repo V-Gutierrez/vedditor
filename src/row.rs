@@ -58,7 +58,7 @@ impl Row {
 
     pub fn insert(&mut self, at: usize, c: char) {
         if at >= self.len() {
-            self.string.push(c)
+            self.string.push(c);
         } else {
             let mut result: String = self.string[..].graphemes(true).take(at).collect();
             let remainder: String = self.string[..].graphemes(true).skip(at).collect();
@@ -67,9 +67,9 @@ impl Row {
             result.push_str(&remainder);
 
             self.string = result;
-
-            self.update_len();
         }
+        
+        self.update_len();
     }
 
     pub fn append(&mut self, new: &Self) {
@@ -100,7 +100,7 @@ impl Row {
         self.string = beggining;
         self.update_len();
 
-       Self::from(&remainder[..])
+        Self::from(&remainder[..])
     }
 
     pub fn as_bytes(&self) -> &[u8] {

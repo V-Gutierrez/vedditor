@@ -68,7 +68,7 @@ impl Document {
             return;
         }
 
-        let new_row = self.rows.get_mut(at.y).unwrap().split(at.y);
+        let new_row = self.rows.get_mut(at.y).unwrap().split(at.x);
 
         self.rows.insert(at.y + 1, new_row);
     }
