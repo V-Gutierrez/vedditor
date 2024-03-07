@@ -15,7 +15,7 @@ const STATUS_BG_COLOR: color::Cyan = color::Cyan;
 const STATUS_FG_COLOR: color::Black = color::Black;
 const QUIT_TIMES: u8 = 3;
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Position {
     pub x: usize,
     pub y: usize,
@@ -98,6 +98,41 @@ impl Editor {
         panic!("{e}");
     }
 
+    fn search(&mut self) {
+        let old_cursor_position = self.cursor_position.clone();
+
+        if let Some(query) = self
+            .prompt("Search (ESC to cancel, Arrows to navigate): ", |editor: &mut Editor, key: Key, query: &String| {
+                let mut moved = false;
+
+                match key {
+                    Key::Right | Key::Down => {
+                        editor.move_cursor(Key::Right);
+                        moved = true;
+                    },
+                    _ => ()
+                };
+
+                if let Some(position) = editor.document.find(&query, &editor.cursor_position) {
+                    editor.cursor_position = position;
+                    editor.scroll();
+                } else if moved {
+                    editor.move_cursor(Key::Left);
+                }
+            })
+            .unwrap_or(None)
+        {
+            if let Some(position) = self.document.find(&query[..], &old_cursor_position) {
+                self.cursor_position = position
+            } else {
+                self.status_message = StatusMessage::from(format!("Search: '{query}' not found"));
+            }
+        } else {
+            self.cursor_position = old_cursor_position;
+            self.scroll();
+        }
+    }
+
     fn process_keypress(&mut self) -> Result<(), Error> {
         // ? Stands for ->  If there’s an error, return it, if not, unwrap the value and continue.
         let pressed_key = Terminal::read_key()?;
@@ -120,22 +155,7 @@ impl Editor {
                 Ok(())
             }
             Key::Ctrl('f') => {
-                if let Some(query) = self
-                    .prompt("Search: ", |editor: &mut Editor, _: Key, query: &String| {
-                        if let Some(position) = editor.document.find(&query) {
-                            editor.cursor_position = position;
-                            editor.scroll();
-                        }
-                    })
-                    .unwrap_or(None)
-                {
-                    if let Some(position) = self.document.find(&query[..]) {
-                        self.cursor_position = position
-                    } else {
-                        self.status_message =
-                            StatusMessage::from(format!("Search: '{query}' not found"));
-                    }
-                }
+                self.search();
 
                 Ok(())
             }
@@ -428,7 +448,7 @@ impl Editor {
 
     fn save(&mut self) {
         if self.document.file_name.is_none() {
-            let new_name = self.prompt("Save as: ", |_, _, _|{}).unwrap_or(None);
+            let new_name = self.prompt("Save as: ", |_, _, _| {}).unwrap_or(None);
 
             if new_name.is_none() {
                 self.status_message = StatusMessage::from("Save aborted".to_string());
