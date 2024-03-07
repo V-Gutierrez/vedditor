@@ -36,7 +36,7 @@ impl Terminal {
     }
 
     pub fn clear_screen() {
-        print!("{}", All);
+        print!("{All}");
     }
 
     #[allow(clippy::cast_possible_truncation)]
@@ -62,15 +62,15 @@ impl Terminal {
     }
 
     pub fn cursor_hide() {
-        print!("{}", Hide);
+        print!("{Hide}");
     }
 
     pub fn cursor_show() {
-        print!("{}", Show);
+        print!("{Show}");
     }
 
     pub fn clear_current_line() {
-        print!("{}", CurrentLine);
+        print!("{CurrentLine}");
     }
 
     pub fn set_bg_color(color: color::Cyan) {

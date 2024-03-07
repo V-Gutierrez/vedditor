@@ -315,7 +315,7 @@ impl Editor {
 
         if let Some(name) = &self.document.file_name {
             file_name = name.clone();
-            file_name.truncate(20)
+            file_name.truncate(20);
         }
 
         let mut status = format!(
@@ -335,7 +335,7 @@ impl Editor {
             status.push_str(&" ".repeat(width - len));
         }
 
-        status = format!("{}{}", status, line_indicator);
+        status = format!("{status}{line_indicator}");
         status.truncate(width);
 
         Terminal::set_bg_color(STATUS_BG_COLOR);
