@@ -188,7 +188,11 @@ impl Editor {
 
         match key {
             Key::Up => y = y.saturating_sub(1),
-            Key::Down => y = y.saturating_add(1),
+            Key::Down => {
+                if y < height {
+                    y = y.saturating_add(1)
+                }
+            },
             Key::Left => {
                 if x > 0 {
                     x -= 1;
