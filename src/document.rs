@@ -58,7 +58,7 @@ impl Document {
             let mut row = Row::default();
             row.insert(0, c);
             self.rows.push(row);
-        } else  {
+        } else {
             let row = self.rows.get_mut(at.y).unwrap();
 
             row.insert(at.x, c)
@@ -112,5 +112,15 @@ impl Document {
 
     pub fn is_dirty(&self) -> bool {
         self.dirty
+    }
+
+    pub fn find(&self, query: &str) -> Option<Position> {
+        for (y, row) in self.rows.iter().enumerate() {
+            if let Some(x) = row.find(query) {
+                return Some(Position { x, y });
+            }
+        }
+
+        None
     }
 }

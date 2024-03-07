@@ -52,8 +52,8 @@ impl Row {
     pub fn insert(&mut self, at: usize, c: char) {
         if at >= self.len() {
             self.string.push(c);
-            self.len +=1;
-            return
+            self.len += 1;
+            return;
         }
 
         let mut result = String::new();
@@ -76,14 +76,14 @@ impl Row {
 
     pub fn append(&mut self, new: &Self) {
         self.string = format!("{}{}", self.string, new.string);
-        
+
         self.len += new.len;
     }
 
     pub fn delete(&mut self, at: usize) {
         if at >= self.len() {
             return;
-        } 
+        }
 
         let mut result = String::new();
         let mut length = 0;
@@ -127,5 +127,21 @@ impl Row {
 
     pub fn as_bytes(&self) -> &[u8] {
         self.string.as_bytes()
+    }
+
+    pub fn find(&self, query: &str) -> Option<usize> {
+        let matching_byte_index: Option<usize> = self.string.find(query);
+
+        if let Some(matching_byte_index) = matching_byte_index {
+            for (grapheme_index, (byte_index, _)) in
+                self.string[..].grapheme_indices(true).enumerate()
+            {
+                if matching_byte_index == byte_index {
+                    return Some(grapheme_index);
+                }
+            }
+        }
+
+        None
     }
 }
