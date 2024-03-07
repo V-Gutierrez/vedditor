@@ -13,6 +13,7 @@ const EDITOR_NAME: &str = env!("CARGO_PKG_NAME");
 const AUTHORS: &str = env!("CARGO_PKG_AUTHORS");
 const STATUS_BG_COLOR: color::Cyan = color::Cyan;
 const STATUS_FG_COLOR: color::Black = color::Black;
+const QUIT_TIMES: u8 = 3;
 
 #[derive(Default)]
 pub struct Position {
@@ -41,6 +42,7 @@ pub struct Editor {
     offset: Position,
     document: Document,
     status_message: StatusMessage,
+    quit_times: u8,
 }
 
 impl Editor {
@@ -69,6 +71,7 @@ impl Editor {
             offset: Position::default(),
             document,
             status_message: StatusMessage::from(initial_status),
+            quit_times: QUIT_TIMES,
         }
     }
 
@@ -101,6 +104,15 @@ impl Editor {
 
         match pressed_key {
             Key::Ctrl('x') => Ok({
+                if self.quit_times > 0 && self.document.is_dirty() {
+                    self.status_message = StatusMessage::from(format!(
+                        "WARNING!!! File has unsaved changes. Press Ctrl-X {} more times to quit.",
+                        self.quit_times
+                    ));
+                    self.quit_times -= 1;
+
+                    return Ok(());
+                }
                 self.should_quit = true;
             }),
             Key::Ctrl('s') => {
@@ -110,6 +122,7 @@ impl Editor {
             Key::Char(c) => {
                 self.document.insert(&self.cursor_position, c);
                 self.move_cursor(Key::Right);
+                self.reset_quit_times();
 
                 Ok(())
             }
@@ -123,6 +136,8 @@ impl Editor {
             | Key::Home => {
                 self.move_cursor(pressed_key);
                 self.scroll();
+                self.reset_quit_times();
+
                 Ok(())
             }
             Key::Delete => {
@@ -291,7 +306,11 @@ impl Editor {
 
     fn draw_status_bar(&self) {
         let width = self.terminal.size().width as usize;
-
+        let modified_indicator = if self.document.is_dirty() {
+            "(modified)"
+        } else {
+            ""
+        };
         let mut file_name = "[No Name]".to_string();
 
         if let Some(name) = &self.document.file_name {
@@ -299,7 +318,10 @@ impl Editor {
             file_name.truncate(20)
         }
 
-        let mut status = format!("{file_name} - {} lines", self.document.len());
+        let mut status = format!(
+            "{file_name} - {} lines {modified_indicator}",
+            self.document.len()
+        );
 
         let line_indicator = format!(
             "{}/{}",
@@ -389,6 +411,13 @@ impl Editor {
             self.status_message = StatusMessage::from("File saved successfully".to_string());
         } else {
             self.status_message = StatusMessage::from("Error saving file".to_string());
+        }
+    }
+
+    fn reset_quit_times(&mut self) {
+        if self.quit_times < QUIT_TIMES {
+            self.quit_times = QUIT_TIMES;
+            self.status_message = StatusMessage::from(String::new());
         }
     }
 }
