@@ -93,12 +93,12 @@ impl Editor {
         }
     }
 
-    fn quit_with_error(e: &std::io::Error) {
+    fn quit_with_error(e: &Error) {
         Terminal::clear_screen();
         panic!("{e}");
     }
 
-    fn process_keypress(&mut self) -> Result<(), std::io::Error> {
+    fn process_keypress(&mut self) -> Result<(), Error> {
         // ? Stands for ->  If there’s an error, return it, if not, unwrap the value and continue.
         let pressed_key = Terminal::read_key()?;
 
@@ -242,7 +242,7 @@ impl Editor {
         self.cursor_position = Position { x, y }
     }
 
-    fn refresh_screen(&self) -> Result<(), std::io::Error> {
+    fn refresh_screen(&self) -> Result<(), Error> {
         Terminal::cursor_hide();
         Terminal::cursor_position(&Position::default());
 

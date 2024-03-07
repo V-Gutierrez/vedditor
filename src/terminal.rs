@@ -1,10 +1,13 @@
-use std::io::{self, stdin, stdout, Error, Write};
+use std::io::{self, stdin, stdout, Error, Stdout, Write};
 
 use termion::{
+    clear::{All, CurrentLine},
     color,
+    cursor::{Goto, Hide, Show},
     event::Key,
     input::TermRead,
     raw::{IntoRawMode, RawTerminal},
+    terminal_size
 };
 
 use crate::Position;
@@ -16,12 +19,12 @@ pub struct Size {
 
 pub struct Terminal {
     size: Size,
-    _stdout: RawTerminal<std::io::Stdout>,
+    _stdout: RawTerminal<Stdout>,
 }
 
 impl Terminal {
-    pub fn init() -> Result<Self, std::io::Error> {
-        let size = termion::terminal_size()?;
+    pub fn init() -> Result<Self, Error> {
+        let size = terminal_size()?;
 
         Ok(Self {
             size: Size {
@@ -33,7 +36,7 @@ impl Terminal {
     }
 
     pub fn clear_screen() {
-        print!("{}", termion::clear::All);
+        print!("{}", All);
     }
 
     #[allow(clippy::cast_possible_truncation)]
@@ -43,14 +46,14 @@ impl Terminal {
         let x = x.saturating_add(1) as u16;
         let y = y.saturating_add(1) as u16;
 
-        print!("{}", termion::cursor::Goto(x, y));
+        print!("{}", Goto(x, y));
     }
 
     pub fn flush() -> Result<(), Error> {
         io::stdout().flush()
     }
 
-    pub fn read_key() -> Result<Key, std::io::Error> {
+    pub fn read_key() -> Result<Key, Error> {
         loop {
             if let Some(key) = stdin().lock().keys().next() {
                 return key;
@@ -59,15 +62,15 @@ impl Terminal {
     }
 
     pub fn cursor_hide() {
-        print!("{}", termion::cursor::Hide);
+        print!("{}", Hide);
     }
 
     pub fn cursor_show() {
-        print!("{}", termion::cursor::Show);
+        print!("{}", Show);
     }
 
     pub fn clear_current_line() {
-        print!("{}", termion::clear::CurrentLine);
+        print!("{}", CurrentLine);
     }
 
     pub fn set_bg_color(color: color::Cyan) {
