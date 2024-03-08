@@ -1,10 +1,10 @@
 pub struct FileType {
     name: String,
-    hl_opts: HighlightningOptions,
+    hl_opts: HighlightingOptions,
 }
 
-#[derive(Default)]
-pub struct HighlightningOptions {
+#[derive(Default, Clone, Copy)]
+pub struct HighlightingOptions {
     pub numbers: bool,
 }
 
@@ -12,7 +12,7 @@ impl Default for FileType {
     fn default() -> Self {
         Self {
             name: String::from("No filetype"),
-            hl_opts: HighlightningOptions::default(),
+            hl_opts: HighlightingOptions::default(),
         }
     }
 }
@@ -21,6 +21,10 @@ impl FileType {
     pub fn name(&self) -> String {
         self.name.clone()
     }
+
+    pub fn highlighting_options(&self) -> HighlightingOptions {
+        self.hl_opts
+    }
 }
 
 impl From<&String> for FileType {
@@ -28,7 +32,7 @@ impl From<&String> for FileType {
         if file_name.ends_with(".rs") {
             return Self {
                 name: String::from("Rust"),
-                hl_opts: HighlightningOptions { numbers: true },
+                hl_opts: HighlightingOptions { numbers: true },
             };
         }
 
