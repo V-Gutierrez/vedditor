@@ -19,7 +19,9 @@ impl Document {
         let mut rows: Vec<Row> = vec![];
 
         for value in contents.lines() {
-            rows.push(Row::from(value));
+            let mut row = Row::from(value);
+            row.highlight(None);
+            rows.push(row);
         }
 
         Ok(Self {
@@ -57,6 +59,7 @@ impl Document {
         if at.y == self.len() {
             let mut row = Row::default();
             row.insert(0, c);
+            row.highlight(None);
             self.rows.push(row);
         } else {
             let row = self.rows.get_mut(at.y).unwrap();
@@ -70,8 +73,12 @@ impl Document {
             self.rows.push(Row::default());
             return;
         }
-
-        let new_row = self.rows.get_mut(at.y).unwrap().split(at.x);
+        
+        let current_row = &mut self.rows[at.y];
+        let mut new_row = current_row.split(at.x);
+        
+        current_row.highlight(None);
+        new_row.highlight(None);
 
         self.rows.insert(at.y + 1, new_row);
     }
@@ -89,10 +96,12 @@ impl Document {
             let row = self.rows.get_mut(at.y).unwrap();
 
             row.append(&next_row);
+            row.highlight(None);
         } else {
             let row = self.rows.get_mut(at.y).unwrap();
 
             row.delete(at.x);
+            row.highlight(None);
         }
     }
 
@@ -153,5 +162,11 @@ impl Document {
         }
 
         None
+    }
+
+    pub fn highlight(&mut self, word: Option<&str>) {
+        for row in &mut self.rows {
+            row.highlight(word);
+        }
     }
 }
