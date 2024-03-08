@@ -1,15 +1,16 @@
 use std::{
-    fs,
+    fs::{self},
     io::{Error, Write},
 };
 
-use crate::{Position, Row, SearchDirection};
+use crate::{FileType, Position, Row, SearchDirection};
 
 #[derive(Default)]
 pub struct Document {
     rows: Vec<Row>,
     pub file_name: Option<String>,
     dirty: bool,
+    file_type: FileType,
 }
 
 impl Document {
@@ -28,10 +29,10 @@ impl Document {
             rows,
             file_name: Some(filename.to_string()),
             dirty: false,
+            file_type: FileType::from(&filename.to_string()),
         })
     }
 
-    #[must_use]
     pub fn row(&self, index: usize) -> Option<&Row> {
         self.rows.get(index)
     }
@@ -73,10 +74,10 @@ impl Document {
             self.rows.push(Row::default());
             return;
         }
-        
+
         let current_row = &mut self.rows[at.y];
         let mut new_row = current_row.split(at.x);
-        
+
         current_row.highlight(None);
         new_row.highlight(None);
 
@@ -114,6 +115,7 @@ impl Document {
                 file.write_all(b"\n")?;
             }
 
+            self.file_type = FileType::from(file_name);
             self.dirty = false
         }
         Ok(())
@@ -125,11 +127,11 @@ impl Document {
 
     pub fn find(&self, query: &str, at: &Position, direction: SearchDirection) -> Option<Position> {
         if at.y >= self.rows.len() {
-            return None
+            return None;
         }
-        
+
         let mut position = Position { x: at.x, y: at.y };
-        
+
         let start = if direction == SearchDirection::Forward {
             at.y
         } else {
@@ -157,7 +159,7 @@ impl Document {
                     position.x = self.rows[position.y].len()
                 }
             } else {
-                return None
+                return None;
             }
         }
 
@@ -168,5 +170,9 @@ impl Document {
         for row in &mut self.rows {
             row.highlight(word);
         }
+    }
+
+    pub fn file_type(&self) -> String {
+        self.file_type.name()
     }
 }

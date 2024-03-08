@@ -7,7 +7,7 @@ use termion::{
     event::Key,
     input::TermRead,
     raw::{IntoRawMode, RawTerminal},
-    terminal_size
+    terminal_size,
 };
 
 use crate::Position;

@@ -145,7 +145,6 @@ impl Editor {
             self.scroll();
         }
         self.document.highlight(None)
-        
     }
 
     fn process_keypress(&mut self) -> Result<(), Error> {
@@ -383,7 +382,8 @@ impl Editor {
         );
 
         let line_indicator = format!(
-            "{}/{}",
+            "{} | {}/{}",
+            self.document.file_type(),
             self.cursor_position.y.saturating_add(1),
             self.document.len()
         );
