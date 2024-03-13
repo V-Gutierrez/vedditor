@@ -258,7 +258,7 @@ impl Row {
                     }
                 }
                 highlighting.push(highlighting::Type::None);
-                index += 1;
+                index += 1; 
                 continue;
             }
 
@@ -286,6 +286,17 @@ impl Row {
                     prev_is_separator = true;
                     index += 1;
                     continue;
+                }
+            }
+
+            if opts.comments() && *c == '/' {
+                if let Some(next_char) = chars.get(index.saturating_add(1)) {
+                    if *next_char == '/' {
+                        for _ in index..chars.len() {
+                            highlighting.push(highlighting::Type::Comment);
+                        }
+                        break
+                    }
                 }
             }
 

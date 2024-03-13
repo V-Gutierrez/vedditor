@@ -66,7 +66,8 @@ impl Document {
         } else {
             let row = self.rows.get_mut(at.y).unwrap();
 
-            row.insert(at.x, c)
+            row.insert(at.x, c);
+            row.highlight(self.file_type.highlighting_options(), None);
         }
     }
 
