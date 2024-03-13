@@ -6,11 +6,12 @@ I'm still working on it's features but it has been great so far!
 
 For now we have the following features:
 
+- Syntax Highlighting (WIP)
 - Save/Save as 
 - Filetype and document size details
 - Search inside the document and navigation through results
 <img width="602" alt="Screenshot 2024-03-13 at 20 01 39" src="https://github.com/V-Gutierrez/vedditor/assets/62355596/ce418280-8033-4f3b-8399-e52fd1616882">
-- Syntax Highlighting (WIP)
+
 
 How to run:
 
