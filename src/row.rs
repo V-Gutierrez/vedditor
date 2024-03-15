@@ -218,31 +218,31 @@ impl Row {
     }
 
     fn highlight_char(
-        &mut self, 
+        &mut self,
         index: &mut usize,
         opts: HighlightingOptions,
         c: char,
-        chars: &Vec<char>,
+        chars: &[char],
     ) -> bool {
-        if opts.characters() && c=='\'' {
+        if opts.characters() && c == '\'' {
             if let Some(next_char) = chars.get(index.saturating_add(1)) {
                 let closing_index = if *next_char == '\\' {
                     index.saturating_add(3)
                 } else {
                     index.saturating_add(2)
                 };
-
                 if let Some(closing_char) = chars.get(closing_index) {
-                    if *closing_char == '\''{
+                    if *closing_char == '\'' {
                         for _ in 0..=closing_index.saturating_sub(*index) {
-                            self.highlighting.push(highlighting::Type::Character)
+                            self.highlighting.push(highlighting::Type::Character);
+                            *index += 1;
                         }
-                        return true
+                        return true;
                     }
                 }
-            };
+            }
         }
-        return false
+        false
     }
     
     fn highlight_comment(
