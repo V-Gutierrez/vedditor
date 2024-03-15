@@ -11,6 +11,7 @@ For now we have the following features:
 - Filetype and document size details
 - Search inside the document and navigation through results
 <img width="602" alt="Screenshot 2024-03-13 at 20 01 39" src="https://github.com/V-Gutierrez/vedditor/assets/62355596/ce418280-8033-4f3b-8399-e52fd1616882">
+<img width="787" alt="image" src="https://github.com/V-Gutierrez/vedditor/assets/62355596/ef86fca3-b0b8-4cdc-9060-31fa4a046dff">
 
 
 How to run:
