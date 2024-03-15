@@ -364,12 +364,12 @@ impl Row {
             highlighting::Type::PrimaryKeywords,
         )
     }
-    
+
     fn highlight_secondary_keywords(
         &mut self,
         index: &mut usize,
         opts: &HighlightingOptions,
-        chars: &[char]
+        chars: &[char],
     ) -> bool {
         self.highlight_keywords(
             index,
@@ -414,6 +414,34 @@ impl Row {
         false
     }
 
+    fn highlight_multiline_comment(
+        &mut self,
+        index: &mut usize,
+        opts: &HighlightingOptions,
+        c: char,
+        chars: &[char],
+    ) -> bool {
+        if opts.comments() && c == '/' && *index < chars.len() {
+            if let Some(next_char) = chars.get(index.saturating_add(1)) {
+                if *next_char == '*' {
+                    let closing_index =
+                        if let Some(closing_index) = self.string[*index + 2..].find("*/") {
+                            *index + closing_index + 4
+                        } else {
+                            chars.len()
+                        };
+
+                    for _ in *index..closing_index {
+                        self.highlighting.push(highlighting::Type::MultilineComment);
+                        *index += 1
+                    }
+                    return true;
+                }
+            }
+        }
+        false
+    }
+
     pub fn highlight(&mut self, opts: &HighlightingOptions, word: Option<&str>) {
         self.highlighting = vec![];
         let chars: Vec<char> = self.string.chars().collect();
@@ -422,7 +450,8 @@ impl Row {
         while let Some(c) = chars.get(index) {
             if self.highlight_char(&mut index, opts, *c, &chars)
                 || self.highlight_comment(&mut index, opts, *c, &chars)
-                || self.highlight_primary_keywords(&mut index, &opts, &chars) 
+                || self.highlight_multiline_comment(&mut index, opts, *c, &chars)
+                || self.highlight_primary_keywords(&mut index, &opts, &chars)
                 || self.highlight_secondary_keywords(&mut index, opts, &chars)
                 || self.highlight_string(&mut index, opts, *c, &chars)
                 || self.highlight_number(&mut index, opts, *c, &chars)
@@ -435,3 +464,7 @@ impl Row {
         self.highlight_match(word);
     }
 }
+
+/* 
+test
+*/
